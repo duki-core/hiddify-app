@@ -18,12 +18,17 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
+
+      # зависимости, кодогенерация, переводы и готовое ядро (скачивается с релиза hiddify-core)
       - name: Prepare
         shell: bash
         run: make windows-prepare
+
+      # portable=true: данные лежат рядом с exe (папка hiddify_portable_data) и не смешиваются
+      # с установленной версией (4.1.1 и т.п.)
       - name: Build
         shell: bash
-        run: make windows-validate
+        run: make windows-validate BUILD_ARGS="--dart-define portable=true"
 
       - name: Zip
         shell: pwsh
