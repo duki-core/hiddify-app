@@ -1,0 +1,37 @@
+name: Build Windows (mono)
+
+on:
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.38.5'
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+      - name: Prepare
+        shell: bash
+        run: make windows-prepare
+      - name: Build
+        shell: bash
+        run: make windows-validate
+
+      - name: Zip
+        shell: pwsh
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath hiddify-mono-windows.zip
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: hiddify-mono-windows
+          path: hiddify-mono-windows.zip
+          retention-days: 7
