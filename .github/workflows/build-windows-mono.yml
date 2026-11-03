@@ -18,12 +18,15 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
+
+ 
       - name: Prepare
         shell: bash
         run: make windows-prepare
+
       - name: Build
         shell: bash
-        run: make windows-validate BUILD_ARGS="--dart-define portable=true"
+        run: flutter build windows --release --target lib/main.dart --dart-define portable=true
 
       - name: Zip
         shell: pwsh
