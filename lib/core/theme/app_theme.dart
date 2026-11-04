@@ -8,24 +8,65 @@ class AppTheme {
   final AppThemeMode mode;
   final String fontFamily;
 
-  ThemeData lightTheme(ColorScheme? lightColorScheme) {
-    final ColorScheme scheme = lightColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0));
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      fontFamily: fontFamily,
-      extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
-    );
-  }
+  static const List<String> _monoStack = ['Cascadia Mono', 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'monospace'];
 
-  ThemeData darkTheme(ColorScheme? darkColorScheme) {
-    final ColorScheme scheme =
-        darkColorScheme ?? ColorScheme.fromSeed(seedColor: const Color(0xFF293CA0), brightness: Brightness.dark);
+  ThemeData lightTheme(ColorScheme? lightColorScheme) => _monoTheme(Brightness.light);
+
+  ThemeData darkTheme(ColorScheme? darkColorScheme) => _monoTheme(Brightness.dark);
+  ThemeData _monoTheme(Brightness brightness) {
+    final bool isDark = brightness == Brightness.dark;
+    final ColorScheme base = ColorScheme.fromSeed(
+      seedColor: Colors.white,
+      brightness: brightness,
+      dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+    );
+    final Color bg = isDark ? const Color(0xFF0A0A0A) : const Color(0xFFF4F4F4);
+    final ColorScheme scheme = base.copyWith(
+      surface: bg,
+      error: isDark ? const Color(0xFFE5736F) : const Color(0xFFB3261E),
+    );
+
+    const RoundedRectangleBorder square = RoundedRectangleBorder(borderRadius: BorderRadius.zero);
+    final BorderSide line = BorderSide(color: scheme.outlineVariant);
+    final OutlineInputBorder inputBorder = OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: line);
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
-      scaffoldBackgroundColor: mode.trueBlack ? Colors.black : scheme.background,
-      fontFamily: fontFamily,
+      scaffoldBackgroundColor: bg,
+      fontFamily: _monoStack.first,
+      fontFamilyFallback: _monoStack.sublist(1),
+      visualDensity: VisualDensity.compact,
+      splashFactory: NoSplash.splashFactory,
+      dividerTheme: DividerThemeData(color: scheme.outlineVariant, thickness: 1, space: 1),
+      appBarTheme: AppBarTheme(backgroundColor: bg, elevation: 0, scrolledUnderElevation: 0),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: bg,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: line),
+      ),
+      dialogTheme: DialogThemeData(
+        elevation: 0,
+        backgroundColor: bg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero, side: line),
+      ),
+      filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(shape: square, elevation: 0)),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(shape: square, elevation: 0)),
+      textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(shape: square)),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(shape: square, side: BorderSide(color: scheme.onSurface)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: inputBorder,
+        enabledBorder: inputBorder,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.zero,
+          borderSide: BorderSide(color: scheme.onSurface),
+        ),
+      ),
+      listTileTheme: const ListTileThemeData(shape: square),
+      chipTheme: const ChipThemeData(shape: square),
       extensions: const <ThemeExtension<dynamic>>{ConnectionButtonTheme.light},
     );
   }
@@ -38,9 +79,6 @@ class AppTheme {
       AppThemeMode.black => true,
     };
     final def = CupertinoThemeData(brightness: isDark ? Brightness.dark : Brightness.light);
-    // final def = CupertinoThemeData(brightness: Brightness.dark);
-
-    // return def;
     final defaultMaterialTheme = isDark ? darkTheme(darkColorScheme) : lightTheme(lightColorScheme);
     return MaterialBasedCupertinoThemeData(
       materialTheme: defaultMaterialTheme.copyWith(
